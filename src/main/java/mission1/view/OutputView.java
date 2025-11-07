@@ -13,6 +13,13 @@ public class OutputView {
         System.out.println("프로그램을 종료합니다.");
     }
 
+    public static void printSearchHeader(String keywordType, String keyword) {
+        System.out.println("----------------------");
+        System.out.println("검색타입 : " + keywordType);
+        System.out.println("검색어 : " + keyword);
+        System.out.println("----------------------");
+    }
+
     public static void printQuoteRegistered(Quote quote) {
         System.out.println(quote.getId() + "번 명언이 등록되었습니다.");
     }

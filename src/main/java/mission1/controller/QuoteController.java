@@ -1,10 +1,13 @@
 package mission1.controller;
 
+import java.util.Map;
 import mission1.domain.Quote;
 import mission1.service.QuoteService;
-import mission1.utils.QuoteValidator;
+import mission1.utils.InputValidator;
 import mission1.view.InputView;
 import mission1.view.OutputView;
+import mission1.utils.QuoteValidator;
+import mission1.utils.CommandParser;
 
 public class QuoteController {
 
@@ -19,8 +22,8 @@ public class QuoteController {
     public void handleCommand(String command) {
         if ("등록".equalsIgnoreCase(command)) {
             registerQuote();
-        } else if ("목록".equalsIgnoreCase(command)) {
-            listQuotes();
+        } else if (command.startsWith("목록")) {
+            listQuotes(command);
         } else if (command.startsWith("삭제?id=")) {
             deleteQuote(command);
         } else if (command.startsWith("수정?id=")) {
@@ -39,9 +42,20 @@ public class QuoteController {
         OutputView.printQuoteRegistered(quote);
     }
 
-    private void listQuotes() {
-        var quotes = service.findAllQuotes();
-        OutputView.printQuoteList(quotes);
+    private void listQuotes(String command) {
+        var params = CommandParser.parseQuery(command);
+        try {
+            InputValidator.validateListSearchParams(params);
+
+            String keywordType = InputValidator.normalizeKeywordType(params.get("keywordType"));
+            String keyword = params.get("keyword");
+
+            OutputView.printSearchHeader(keywordType, keyword);
+            var quotes = service.findQuotes(keywordType, keyword);
+            OutputView.printQuoteList(quotes);
+        } catch (IllegalArgumentException e) {
+            OutputView.printError(e.getMessage());
+        }
     }
 
     private void deleteQuote(String command) {

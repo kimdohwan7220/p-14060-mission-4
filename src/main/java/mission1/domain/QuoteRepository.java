@@ -117,6 +117,24 @@ public class QuoteRepository {
         writeQuote(updated);
     }
 
+    public List<Quote> search(String keywordType, String keyword) {
+        if (keyword == null || keyword.isBlank()) return findAll();
+
+        String normalizedKeyword = keyword.toLowerCase();
+
+        return store.values().stream()
+                .sorted(Comparator.comparingInt(Quote::getId).reversed())
+                .filter(q -> {
+                    if ("content".equals(keywordType)) {
+                        return q.getContent() != null && q.getContent().toLowerCase().contains(normalizedKeyword);
+                    } else if ("author".equals(keywordType)) {
+                        return q.getAuthor() != null && q.getAuthor().toLowerCase().contains(normalizedKeyword);
+                    }
+                    return false;
+                })
+                .toList();
+    }
+
     public void buildDataJson() {
         try {
             List<Quote> list = new ArrayList<>(store.values());

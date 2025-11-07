@@ -26,6 +26,10 @@ public class QuoteService {
         return repository.findAll();
     }
 
+    public List<Quote> findQuotes(String keywordType, String keyword) {
+        return repository.search(keywordType, keyword);
+    }
+
     public Quote findQuoteById(int id) {
         validator.validateQuoteExists(id);
         return repository.findById(id);
