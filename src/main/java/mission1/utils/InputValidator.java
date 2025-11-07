@@ -37,12 +37,14 @@ public class InputValidator {
         throw new IllegalArgumentException("검색 타입(keywordType)은 content 또는 author만 가능합니다.");
     }
 
-    public static void validateListSearchParams(Map<String, String> params) {
+    public static String validateListSearchParams(Map<String, String> params) {
         String type = normalizeKeywordType(params.get("keywordType"));
         String keyword = params.get("keyword");
 
         if (isBlank(keyword)) {
             throw new IllegalArgumentException("검색어(keyword)를 입력해주세요.");
         }
+
+        return type;
     }
 }

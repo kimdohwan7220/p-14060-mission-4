@@ -44,15 +44,14 @@ public class QuoteController {
 
     private void listQuotes(String command) {
         var params = CommandParser.parseQuery(command);
+
+        if (params.isEmpty()) {
+            printAllQuotes();
+            return;
+        }
+
         try {
-            InputValidator.validateListSearchParams(params);
-
-            String keywordType = InputValidator.normalizeKeywordType(params.get("keywordType"));
-            String keyword = params.get("keyword");
-
-            OutputView.printSearchHeader(keywordType, keyword);
-            var quotes = service.findQuotes(keywordType, keyword);
-            OutputView.printQuoteList(quotes);
+            handleSearchQuotes(params);
         } catch (IllegalArgumentException e) {
             OutputView.printError(e.getMessage());
         }
@@ -60,7 +59,7 @@ public class QuoteController {
 
     private void deleteQuote(String command) {
         try {
-            int id = Integer.parseInt(command.substring("삭제?id=".length()));
+            int id = InputValidator.parseIntOrThrow(command.substring("삭제?id=".length()), "id");
             service.deleteQuote(id);
             OutputView.printQuoteDeleted(id);
         } catch (IllegalArgumentException e) {
@@ -70,7 +69,7 @@ public class QuoteController {
 
     private void updateQuote(String command) {
         try {
-            int id = Integer.parseInt(command.substring("수정?id=".length()));
+            int id = InputValidator.parseIntOrThrow(command.substring("수정?id=".length()), "id");
             Quote existing = service.findQuoteById(id);
 
             String newContent = InputView.quoteInput(existing.getContent());
@@ -81,6 +80,20 @@ public class QuoteController {
         } catch (IllegalArgumentException e) {
             OutputView.printError(e.getMessage());
         }
+    }
+
+    private void printAllQuotes() {
+        var quotes = service.findAllQuotes();
+        OutputView.printQuoteList(quotes);
+    }
+
+    private void handleSearchQuotes(Map<String, String> params) {
+        String keywordType = InputValidator.validateListSearchParams(params);
+        String keyword = params.get("keyword");
+
+        OutputView.printSearchHeader(keywordType, keyword);
+        var quotes = service.findQuotes(keywordType, keyword);
+        OutputView.printQuoteList(quotes);
     }
 
     private void buildData() {
