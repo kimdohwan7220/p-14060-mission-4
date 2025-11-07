@@ -1,0 +1,21 @@
+# Gradle build output
+/build/
+/out/
+/.gradle/
+/.idea/
+*.iml
+gradlew
+gradlew.bat
+build.gradle
+settings.gradle
+gradle/
+db/wiseSaying/
+
+# IntelliJ
+/.idea/
+/*.iml
+/out/
+
+# OS 관련
+.DS_Store
+Thumbs.db
