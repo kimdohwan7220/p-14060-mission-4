@@ -47,4 +47,22 @@ public class InputValidator {
 
         return type;
     }
+
+    public static void validatePageRange(int page, int totalPages) {
+        if (page < 1) {
+            throw new IllegalArgumentException("page는 1 이상이어야 합니다.");
+        }
+        if (page > totalPages) {
+            throw new IllegalArgumentException("페이지는 1 이상 " + totalPages + " 이하만 가능합니다.");
+        }
+    }
+
+    public static int parsePageOrDefault(Map<String, String> params, int defaultPage) {
+        String pageText = params.get("page");
+        if (pageText == null || pageText.isBlank()) {
+            return defaultPage;
+        }
+
+        return parseIntOrThrow(pageText, "page");
+    }
 }

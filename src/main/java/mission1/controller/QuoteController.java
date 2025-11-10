@@ -1,9 +1,11 @@
 package mission1.controller;
 
+import java.util.List;
 import java.util.Map;
 import mission1.domain.Quote;
 import mission1.service.QuoteService;
 import mission1.utils.InputValidator;
+import mission1.utils.Pagination;
 import mission1.view.InputView;
 import mission1.view.OutputView;
 import mission1.utils.CommandParser;
@@ -15,6 +17,8 @@ public class QuoteController {
     private static final String CMD_DELETE = "삭제?id=";
     private static final String CMD_UPDATE = "수정?id=";
     private static final String CMD_BUILD = "빌드";
+
+    private static final int PAGE_SIZE = 5;
 
     private final QuoteService service;
 
@@ -50,15 +54,16 @@ public class QuoteController {
     }
 
     private void listQuotes(String command) {
-        var params = CommandParser.parseQuery(command);
-
-        if (params.isEmpty()) {
-            printAllQuotes();
-            return;
-        }
+        Map<String, String> params = CommandParser.parseQuery(command);
 
         try {
-            handleSearchQuotes(params);
+            int page = InputValidator.parsePageOrDefault(params, 1);
+
+            if (isSearch(params)) {
+                handleSearchQuotes(params, page);
+            } else {
+                handleListAll(page);
+            }
         } catch (IllegalArgumentException e) {
             OutputView.printError(e.getMessage());
         }
@@ -89,20 +94,6 @@ public class QuoteController {
         }
     }
 
-    private void printAllQuotes() {
-        var quotes = service.findAllQuotes();
-        OutputView.printQuoteList(quotes);
-    }
-
-    private void handleSearchQuotes(Map<String, String> params) {
-        String keywordType = InputValidator.validateListSearchParams(params);
-        String keyword = params.get("keyword");
-
-        OutputView.printSearchHeader(keywordType, keyword);
-        var quotes = service.findQuotes(keywordType, keyword);
-        OutputView.printQuoteList(quotes);
-    }
-
     private void buildData() {
         try {
             service.buildDataJson();
@@ -110,5 +101,35 @@ public class QuoteController {
         } catch (Exception e) {
             OutputView.printError(e.getMessage());
         }
+    }
+
+    private boolean isSearch(Map<String, String> params) {
+        return params.containsKey("keywordType") || params.containsKey("keyword");
+    }
+
+    private void handleListAll(int page) {
+        List<Quote> all = service.findAllQuotes();
+        printPagedQuotes(all, page);
+    }
+
+    private void handleSearchQuotes(Map<String, String> params, int page) {
+        String keywordType = InputValidator.validateListSearchParams(params);
+        String keyword = params.get("keyword");
+
+        OutputView.printSearchHeader(keywordType, keyword);
+
+        List<Quote> filtered = service.findQuotes(keywordType, keyword);
+        printPagedQuotes(filtered, page);
+    }
+
+    private void printPagedQuotes(List<Quote> all, int page) {
+        Pagination<Quote> pagination = new Pagination<>(all, page, PAGE_SIZE);
+
+        int totalPages = pagination.getTotalPages();
+        InputValidator.validatePageRange(page, totalPages);
+
+        List<Quote> pageList = pagination.getPageItems();
+        OutputView.printQuoteList(pageList);
+        OutputView.printPageInfo(page, totalPages);
     }
 }

@@ -47,4 +47,20 @@ public class OutputView {
     public static void printBuildDone() {
         System.out.println("data.json 파일의 내용이 갱신되었습니다.");
     }
+
+    public static void printPageInfo(int currentPage, int totalPages) {
+        if (totalPages <= 0) return;
+
+        StringBuilder sb = new StringBuilder("페이지 : ");
+        for (int p = 1; p <= totalPages; p++) {
+            if (p > 1) sb.append(" / ");
+
+            if (p == currentPage) {
+                sb.append("[").append(p).append("]");
+            } else {
+                sb.append(p);
+            }
+        }
+        System.out.println(sb);
+    }
 }
