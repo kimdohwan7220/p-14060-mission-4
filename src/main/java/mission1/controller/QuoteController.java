@@ -6,30 +6,37 @@ import mission1.service.QuoteService;
 import mission1.utils.InputValidator;
 import mission1.view.InputView;
 import mission1.view.OutputView;
-import mission1.utils.QuoteValidator;
 import mission1.utils.CommandParser;
 
 public class QuoteController {
 
+    private static final String CMD_REGISTER = "등록";
+    private static final String CMD_LIST = "목록";
+    private static final String CMD_DELETE = "삭제?id=";
+    private static final String CMD_UPDATE = "수정?id=";
+    private static final String CMD_BUILD = "빌드";
+
     private final QuoteService service;
-    private final QuoteValidator validator;
 
     public QuoteController(QuoteService service) {
         this.service = service;
-        this.validator = new QuoteValidator(service.getRepository());
     }
 
     public void handleCommand(String command) {
-        if ("등록".equalsIgnoreCase(command)) {
-            registerQuote();
-        } else if (command.startsWith("목록")) {
-            listQuotes(command);
-        } else if (command.startsWith("삭제?id=")) {
-            deleteQuote(command);
-        } else if (command.startsWith("수정?id=")) {
-            updateQuote(command);
-        } else if ("빌드".equalsIgnoreCase(command)) {
-            buildData();
+        if (CMD_REGISTER.equalsIgnoreCase(command)) {
+            registerQuote(); return;
+        }
+        if (command.startsWith(CMD_LIST)) {
+            listQuotes(command); return;
+        }
+        if (command.startsWith(CMD_DELETE)) {
+            deleteQuote(command); return;
+        }
+        if (command.startsWith(CMD_UPDATE)) {
+            updateQuote(command); return;
+        }
+        if (CMD_BUILD.equalsIgnoreCase(command)) {
+            buildData(); return;
         }
     }
 
@@ -59,7 +66,7 @@ public class QuoteController {
 
     private void deleteQuote(String command) {
         try {
-            int id = InputValidator.parseIntOrThrow(command.substring("삭제?id=".length()), "id");
+            int id = InputValidator.parseIntOrThrow(command.substring(CMD_DELETE.length()), "id");
             service.deleteQuote(id);
             OutputView.printQuoteDeleted(id);
         } catch (IllegalArgumentException e) {
@@ -69,7 +76,7 @@ public class QuoteController {
 
     private void updateQuote(String command) {
         try {
-            int id = InputValidator.parseIntOrThrow(command.substring("수정?id=".length()), "id");
+            int id = InputValidator.parseIntOrThrow(command.substring(CMD_UPDATE.length()), "id");
             Quote existing = service.findQuoteById(id);
 
             String newContent = InputView.quoteInput(existing.getContent());
